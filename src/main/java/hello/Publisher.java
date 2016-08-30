@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service;
 import reactor.bus.Event;
 import reactor.bus.EventBus;
 
-@Service
+//@Service
 public class Publisher {
 	@Autowired
 	EventBus eventBus;
