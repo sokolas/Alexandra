@@ -1,7 +1,5 @@
 package main;
 
-import java.util.concurrent.CountDownLatch;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
@@ -12,7 +10,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 
-import hello.Publisher;
 import reactor.Environment;
 import reactor.bus.Event;
 import reactor.bus.EventBus;
@@ -24,11 +21,9 @@ import sx.blah.discord.api.events.IListener;
 import sx.blah.discord.handle.impl.events.MessageReceivedEvent;
 
 @Configuration
-@ComponentScan
+@ComponentScan(basePackages={"main", "rpgbot"})
 @EnableAutoConfiguration
 public class Application implements CommandLineRunner {
-
-	private static final int NUMBER = 5;
 
 	@Bean
 	Environment env() {
@@ -38,11 +33,6 @@ public class Application implements CommandLineRunner {
 	@Bean
 	EventBus eventBus(Environment env) {
 		return EventBus.create(env);
-	}
-	
-	@Bean
-	CountDownLatch latch() {
-		return new CountDownLatch(NUMBER);
 	}
 	
 	@Autowired
