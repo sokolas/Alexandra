@@ -14,7 +14,8 @@ import reactor.Environment;
 import reactor.bus.Event;
 import reactor.bus.EventBus;
 import reactor.bus.selector.Selectors;
-import rpgbot.MSGReceiver;
+import rpgbot.MessageReceiver;
+import rpgbot.MsgLogger;
 import sx.blah.discord.api.ClientBuilder;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.events.IListener;
@@ -42,7 +43,10 @@ public class Application implements CommandLineRunner {
 //	private Publisher publisher;
 	
 	@Autowired
-	private MSGReceiver receiver;
+	private MessageReceiver receiver;
+
+	@Autowired
+	private MsgLogger msgLogger;
 	
 	@Value("${app.token}")
 	private String token;
@@ -61,6 +65,7 @@ public class Application implements CommandLineRunner {
 	@Override
 	public void run(String... arg0) throws Exception {
 		eventBus.on(Selectors.$("messages"), receiver);
+		eventBus.on(Selectors.$("messages"), msgLogger);
 //		publisher.publishQuotes(NUMBER);
 		
 		ClientBuilder builder = new ClientBuilder();

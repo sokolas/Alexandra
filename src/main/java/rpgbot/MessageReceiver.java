@@ -10,13 +10,13 @@ import sx.blah.discord.util.MissingPermissionsException;
 import sx.blah.discord.util.RateLimitException;
 
 @Service
-public class MSGReceiver implements Consumer<Event<MessageReceivedEvent>>{
+public class MessageReceiver implements Consumer<Event<MessageReceivedEvent>>{
 	
 	
 	@Override
 	public void accept(Event<MessageReceivedEvent> t) {
 		MessageReceivedEvent data = t.getData();
-		System.out.println(data.getMessage().getContent());
+//		System.out.println(data.getMessage().getContent());
 		try {
 			data.getMessage().getChannel().sendMessage("OK");
 		} catch (MissingPermissionsException | RateLimitException | DiscordException e) {
