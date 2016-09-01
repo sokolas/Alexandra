@@ -5,11 +5,14 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.stereotype.Repository;
 import reactor.Environment;
 import reactor.bus.Event;
 import reactor.bus.EventBus;
@@ -22,8 +25,10 @@ import sx.blah.discord.api.events.IListener;
 import sx.blah.discord.handle.impl.events.MessageReceivedEvent;
 
 @Configuration
-@ComponentScan(basePackages={"main", "rpgbot"})
+@ComponentScan(basePackages={"main", "rpgbot", "persistence"})
 @EnableAutoConfiguration
+@EnableJpaRepositories("persistence")
+@EntityScan("persistence")
 public class Application implements CommandLineRunner {
 
 	@Bean
