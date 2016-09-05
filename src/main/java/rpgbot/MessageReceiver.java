@@ -42,12 +42,12 @@ public class MessageReceiver implements Consumer<Event<MessageReceivedEvent>>{
                 e.printStackTrace();
             }
         } else {
-//		System.out.println(data.getMessage().getContent());
-			try {
+        	System.out.println(data.getMessage().getContent());
+			/*try {
 				data.getMessage().getChannel().sendMessage("OK");
 			} catch (MissingPermissionsException | RateLimitException | DiscordException e) {
 				e.printStackTrace();
-			}
+			}*/
 		}
 	}
 	
