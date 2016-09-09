@@ -44,9 +44,6 @@ public class Application implements CommandLineRunner {
 	@Autowired
 	private EventBus eventBus;
 	
-//	@Autowired
-//	private Publisher publisher;
-	
 	@Autowired
 	private MessageReceiver receiver;
 
@@ -61,28 +58,17 @@ public class Application implements CommandLineRunner {
 	
 	public static void main(String[] args) throws InterruptedException {
 		ConfigurableApplicationContext ctx = SpringApplication.run(Application.class, args);
-//		Environment env = ctx.getBean(Environment.class);
-//		CountDownLatch latch = ctx.getBean(CountDownLatch.class);
-//		latch.await();
-//		env.shutdown();
 	}
 	
 	@Override
 	public void run(String... arg0) throws Exception {
 		eventBus.on(Selectors.$("messages"), receiver);
 		eventBus.on(Selectors.$("messages"), msgLogger);
-//		publisher.publishQuotes(NUMBER);
-		
+
 		ClientBuilder builder = new ClientBuilder();
 		builder.withToken(token);
 		client = builder.login();
-		client.getDispatcher().registerListener(new IListener<MessageReceivedEvent>() {
-
-			@Override
-			public void handle(MessageReceivedEvent event) {
-				eventBus.notify("messages", Event.wrap(event));
-			}
-		});
+		client.getDispatcher().registerListener(event -> eventBus.notify("messages", Event.wrap(event)));
 	}
 	
 }
