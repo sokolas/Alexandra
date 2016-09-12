@@ -51,6 +51,11 @@
 			<artifactId>reactor-bus</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-configuration2</artifactId>
+			<version>2.1</version>
+		</dependency>
+		<dependency>
 			<groupId>com.github.austinv11</groupId>
 			<artifactId>Discord4j</artifactId>
 			<!--<version>dev-SNAPSHOT</version>-->
