@@ -6,24 +6,23 @@ import org.springframework.stereotype.Service;
 import persistence.LogEntry;
 import persistence.MessageRepository;
 import reactor.bus.Event;
-import reactor.fn.Consumer;
 import sx.blah.discord.handle.impl.events.MessageReceivedEvent;
 import sx.blah.discord.util.DiscordException;
 import sx.blah.discord.util.MissingPermissionsException;
 import sx.blah.discord.util.RateLimitException;
 
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 @Service
-public class MessageReceiver implements Consumer<Event<MessageReceivedEvent>>{
+public class MessageReceiver implements Consumer<MessageReceivedEvent> {
 
 	@Autowired
 	private MessageRepository messageRepository;
 
 	@Override
-	public void accept(Event<MessageReceivedEvent> t) {
-		MessageReceivedEvent data = t.getData();
+	public void accept(MessageReceivedEvent data) {
 		if (data.getMessage().getContent().contains("test")) {
             List<LogEntry> all = messageRepository.findAll();
             List<String> strings = all.stream()

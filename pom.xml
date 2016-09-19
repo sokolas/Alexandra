@@ -10,14 +10,32 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>1.4.0.RELEASE</version>
+		<version>1.4.1.BUILD-SNAPSHOT</version>
 	</parent>
 
 	<properties>
 		<java.version>1.8</java.version>
+        <reactor.version>3.0.0.BUILD-SNAPSHOT</reactor.version>
+        <spring.version>5.0.0.BUILD-SNAPSHOT</spring.version>
 	</properties>
 	
 	<repositories>
+		<repository>
+			<id>spring-snapshots</id>
+			<name>Spring Snapshots</name>
+			<url>https://repo.spring.io/snapshot</url>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+		</repository>
+		<repository>
+			<id>spring-milestones</id>
+			<name>Spring Milestones</name>
+			<url>https://repo.spring.io/milestone</url>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+		</repository>
 		<repository> <!-- This repo fixes issues with transitive dependencies -->
 			<id>jcenter</id>
 			<url>http://jcenter.bintray.com</url>
@@ -64,6 +82,24 @@
 				bundled into one jar) -->
 		</dependency>
 	</dependencies>
+    <pluginRepositories>
+        <pluginRepository>
+            <id>spring-snapshots</id>
+            <name>Spring Snapshots</name>
+            <url>https://repo.spring.io/snapshot</url>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </pluginRepository>
+        <pluginRepository>
+            <id>spring-milestones</id>
+            <name>Spring Milestones</name>
+            <url>https://repo.spring.io/milestone</url>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </pluginRepository>
+    </pluginRepositories>
 	<build>
 		<plugins>
 			<plugin>

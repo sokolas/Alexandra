@@ -1,5 +1,7 @@
 package main;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
@@ -12,15 +14,15 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
-import org.springframework.stereotype.Repository;
-import reactor.Environment;
-import reactor.bus.Event;
-import reactor.bus.EventBus;
-import reactor.bus.selector.Selectors;
+import reactor.core.publisher.BlockingSink;
+import reactor.core.publisher.EmitterProcessor;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.FluxSink;
 import rpgbot.MessageReceiver;
 import rpgbot.MsgLogger;
 import sx.blah.discord.api.ClientBuilder;
 import sx.blah.discord.api.IDiscordClient;
+import sx.blah.discord.api.events.Event;
 import sx.blah.discord.api.events.IListener;
 import sx.blah.discord.handle.impl.events.MessageReceivedEvent;
 
@@ -30,25 +32,16 @@ import sx.blah.discord.handle.impl.events.MessageReceivedEvent;
 @EnableJpaRepositories("persistence")
 @EntityScan("persistence")
 public class Application implements CommandLineRunner {
+    private static Logger logger = LoggerFactory.getLogger(Application.class);
 
-	@Bean
-	Environment env() {
-		return Environment.initializeIfEmpty().assignErrorJournal();
-	}
-	
-	@Bean
-	EventBus eventBus(Environment env) {
-		return EventBus.create(env);
-	}
-	
-	@Autowired
-	private EventBus eventBus;
-	
 	@Autowired
 	private MessageReceiver receiver;
 
 	@Autowired
 	private MsgLogger msgLogger;
+
+    @Autowired
+    private BlockingSink<Event> eventBlockingSink;
 	
 	@Value("${app.token}")
 	private String token;
@@ -59,16 +52,32 @@ public class Application implements CommandLineRunner {
 	public static void main(String[] args) throws InterruptedException {
 		ConfigurableApplicationContext ctx = SpringApplication.run(Application.class, args);
 	}
-	
+
+	@Bean
+    public BlockingSink<Event> eventBlockingSink() {
+        EmitterProcessor<Event> eventProcessor = EmitterProcessor.create();
+        eventProcessor.subscribe(System.out::println);
+        return eventProcessor.connectSink();
+    }
+
 	@Override
 	public void run(String... arg0) throws Exception {
-		eventBus.on(Selectors.$("messages"), receiver);
-		eventBus.on(Selectors.$("messages"), msgLogger);
-
 		ClientBuilder builder = new ClientBuilder();
 		builder.withToken(token);
 		client = builder.login();
-		client.getDispatcher().registerListener(event -> eventBus.notify("messages", Event.wrap(event)));
-	}
+
+        Flux
+            .<Event>create(emitter -> {
+                IListener fluxListener = emitter::next;
+                client.getDispatcher().registerListener(fluxListener);
+                emitter.setCancellation(() -> {
+                    client.getDispatcher().unregisterListener(fluxListener);
+                    logger.info("Unregistered");
+                });
+            }, FluxSink.OverflowStrategy.LATEST)
+            .log()
+            .doOnComplete(() -> logger.info("Done"))
+            .subscribe(eventBlockingSink);
+    }
 	
 }

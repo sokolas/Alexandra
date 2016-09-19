@@ -8,20 +8,19 @@ import org.springframework.stereotype.Service;
 
 import persistence.LogEntry;
 import persistence.MessageRepository;
-import reactor.bus.Event;
-import reactor.fn.Consumer;
+import sx.blah.discord.api.events.Event;
 import sx.blah.discord.handle.impl.events.MessageReceivedEvent;
 
+import java.util.function.Consumer;
+
 @Service
-public class MsgLogger implements Consumer<Event<sx.blah.discord.api.events.Event>>{
+public class MsgLogger implements Consumer<Event> {
 	private static Logger logger = LoggerFactory.getLogger(MsgLogger.class);
 
     @Autowired
     private MessageRepository messageRepository;
 
-	@Override
-	public void accept(Event<sx.blah.discord.api.events.Event> event) {
-		sx.blah.discord.api.events.Event data = event.getData();
+	public void accept(Event data) {
 		logger.info(data.toString());
 		if (data instanceof MessageReceivedEvent) {
             LogEntry entry = new LogEntry();
@@ -31,5 +30,5 @@ public class MsgLogger implements Consumer<Event<sx.blah.discord.api.events.Even
             messageRepository.save(entry);
 		}
 	}
-	
+
 }
