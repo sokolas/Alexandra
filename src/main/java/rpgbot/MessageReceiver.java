@@ -1,5 +1,7 @@
 package rpgbot;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -17,6 +19,7 @@ import java.util.stream.Collectors;
 
 @Service
 public class MessageReceiver implements Consumer<MessageReceivedEvent> {
+    private static Logger logger = LoggerFactory.getLogger(MessageReceiver.class);
 
 	@Autowired
 	private MessageRepository messageRepository;
@@ -41,12 +44,7 @@ public class MessageReceiver implements Consumer<MessageReceivedEvent> {
                 e.printStackTrace();
             }
         } else {
-        	System.out.println(data.getMessage().getContent());
-			/*try {
-				data.getMessage().getChannel().sendMessage("OK");
-			} catch (MissingPermissionsException | RateLimitException | DiscordException e) {
-				e.printStackTrace();
-			}*/
+        	logger.info(data.getMessage().getContent());
 		}
 	}
 	
