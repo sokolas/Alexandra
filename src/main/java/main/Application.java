@@ -14,10 +14,8 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
-import reactor.core.publisher.BlockingSink;
-import reactor.core.publisher.EmitterProcessor;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.FluxSink;
+import reactor.core.publisher.*;
+import reactor.util.function.Tuple2;
 import rpgbot.MessageReceiver;
 import rpgbot.MsgLogger;
 import sx.blah.discord.api.ClientBuilder;
@@ -25,6 +23,12 @@ import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.events.Event;
 import sx.blah.discord.api.events.IListener;
 import sx.blah.discord.handle.impl.events.MessageReceivedEvent;
+import sx.blah.discord.handle.impl.obj.Channel;
+import sx.blah.discord.util.DiscordException;
+import sx.blah.discord.util.MissingPermissionsException;
+import sx.blah.discord.util.RateLimitException;
+
+import java.util.function.Consumer;
 
 @Configuration
 @ComponentScan(basePackages={"main", "rpgbot", "persistence"})
@@ -42,7 +46,10 @@ public class Application implements CommandLineRunner {
 
     @Autowired
     private BlockingSink<Event> eventBlockingSink;
-	
+
+    @Autowired
+    private Consumer<Tuple2<Channel, String>> sender;
+
 	@Value("${app.token}")
 	private String token;
 
@@ -60,7 +67,19 @@ public class Application implements CommandLineRunner {
         return eventProcessor.connectSink();
     }
 
-	@Override
+    @Bean
+    public Consumer<Tuple2<Channel, String>> sender() {
+        Consumer<Tuple2<Channel, String>> sender = (t -> {
+            try {
+                t.getT1().sendMessage(t.getT2());
+            } catch (MissingPermissionsException | RateLimitException | DiscordException e) {
+                logger.error("Can't send message ", e);
+            }
+        });
+        return sender;
+    }
+
+    @Override
 	public void run(String... arg0) throws Exception {
 		ClientBuilder builder = new ClientBuilder();
 		builder.withToken(token);
@@ -79,5 +98,6 @@ public class Application implements CommandLineRunner {
             .doOnComplete(() -> logger.info("Done"))
             .subscribe(eventBlockingSink);
     }
-	
+
+
 }

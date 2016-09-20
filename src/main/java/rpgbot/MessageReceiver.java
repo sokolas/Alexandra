@@ -6,7 +6,9 @@ import org.springframework.stereotype.Service;
 import persistence.LogEntry;
 import persistence.MessageRepository;
 import reactor.bus.Event;
+import reactor.util.function.Tuple2;
 import sx.blah.discord.handle.impl.events.MessageReceivedEvent;
+import sx.blah.discord.handle.impl.obj.Channel;
 import sx.blah.discord.util.DiscordException;
 import sx.blah.discord.util.MissingPermissionsException;
 import sx.blah.discord.util.RateLimitException;
@@ -20,6 +22,9 @@ public class MessageReceiver implements Consumer<MessageReceivedEvent> {
 
 	@Autowired
 	private MessageRepository messageRepository;
+
+    @Autowired
+    private Consumer<Tuple2<Channel, String>> sender;
 
 	@Override
 	public void accept(MessageReceivedEvent data) {
