@@ -1,5 +1,7 @@
 package rpgbot;
 
+import sx.blah.discord.handle.obj.IChannel;
+
 public class Game {
     public enum State {
         STOPPED,
@@ -7,6 +9,7 @@ public class Game {
         RUNNING
     }
 
+    private IChannel channel;
 
 }
 

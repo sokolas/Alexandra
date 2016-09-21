@@ -22,13 +22,13 @@ public class MsgLogger implements Consumer<Event> {
 
 	public void accept(Event data) {
 		logger.info(data.toString());
-		if (data instanceof MessageReceivedEvent) {
+		/*if (data instanceof MessageReceivedEvent) {
             LogEntry entry = new LogEntry();
             entry.setAuthor(((MessageReceivedEvent) data).getMessage().getAuthor().getName());
             entry.setDate(((MessageReceivedEvent) data).getMessage().getTimestamp());
             entry.setText(((MessageReceivedEvent) data).getMessage().getContent());
             messageRepository.save(entry);
-		}
+		}*/
 	}
 
 }
