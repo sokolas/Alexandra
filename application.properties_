@@ -1,2 +1,7 @@
 spring.datasource.url=jdbc:hsqldb:file:data/db
 spring.jpa.hibernate.ddl-auto=update
+app.token=MY_SECRET_TOKEN
+allowedChannels=general
+minLogs=700
+maxLogs=1500
+resetCount=500

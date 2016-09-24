@@ -1,5 +1,6 @@
 package main;
 
+import markov.MarkovSubscriber;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -61,6 +62,9 @@ public class Application implements CommandLineRunner {
     @Autowired
     private Consumer<Tuple2<IChannel, String>> sender;
 
+    @Autowired
+    private MarkovSubscriber markovSubscriber;
+
 	@Value("${app.token}")
 	private String token;
 
@@ -86,6 +90,11 @@ public class Application implements CommandLineRunner {
     @Bean
     public EmitterProcessor<Event> discordEmitterProcessor() {
         return EmitterProcessor.create();
+    }
+
+    @Bean
+    public MarkovSubscriber markovSubscriber() {
+        return new MarkovSubscriber();
     }
 
     // ====================================================================
@@ -127,5 +136,6 @@ public class Application implements CommandLineRunner {
                 .filter(event -> event instanceof MessageReceivedEvent)
                 .map(event -> (MessageReceivedEvent) event)
                 .subscribe(receiver);
+        discordEmitterProcessor.subscribe(markovSubscriber);
     }
 }
