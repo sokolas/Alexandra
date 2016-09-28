@@ -151,7 +151,7 @@ public class Markov {
         while (info.getFollow().size() > 0 && !finished && size < 30) {
             if (info.getStops().size() > 0) {
                 if (random.nextDouble() < 0.4) {
-                    ArrayList<String> stops = new ArrayList<>(info.getFollow());
+                    ArrayList<String> stops = new ArrayList<>(info.getStops());
                     sb.append(stops.get(random.nextInt(stops.size())));
                 } else {
                     if (info.isStop() && random.nextDouble() < 0.2) {
