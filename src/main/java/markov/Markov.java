@@ -1,5 +1,7 @@
 package markov;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import reactor.util.function.Tuple2;
 import sx.blah.discord.handle.obj.IChannel;
@@ -12,7 +14,10 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class Markov {
+    private final static Logger logger = LoggerFactory.getLogger(Markov.class);
+
     public static final Pattern garbage = Pattern.compile("[^\\w,.:!?-]+", Pattern.UNICODE_CHARACTER_CLASS);
+    public static final Pattern emoji = Pattern.compile(":\\w+:", Pattern.UNICODE_CHARACTER_CLASS);
     public static final Pattern ending = Pattern.compile("[\\W]+$", Pattern.UNICODE_CHARACTER_CLASS);
     public static final Pattern url = Pattern.compile("(http|https)://[^\\s]+", Pattern.UNICODE_CHARACTER_CLASS);
 
@@ -109,17 +114,24 @@ public class Markov {
         }
         String prevKey = "";
         for (String word:  words) {
-            Matcher matcher = this.ending.matcher(word);
-            String w = matcher.replaceAll("");
-            matcher.reset();
+            Matcher matcher = ending.matcher(word);
+            String w = word;
+            boolean isEmoji = emoji.matcher(word).matches();
+            if (!isEmoji) {
+                w = matcher.replaceAll("");
+                matcher.reset();
+            }
             String key = w.toLowerCase();
+            if (w.isEmpty()) {
+                continue;
+            }
             Info info;
             if (this.data.get(key) != null) {
                 info = this.data.get(key);
             } else {
                 info = new Info(w);
             }
-            if (matcher.matches()) {
+            if (matcher.matches() && !isEmoji) {
                 String stop = matcher.group();
                 info.setStop(true);
                 info.getStops().add(stop);
@@ -133,6 +145,7 @@ public class Markov {
                 Info prevInfo = this.data.get(prevKey);
                 prevInfo.getFollow().add(key);
             }
+            logger.debug(info.toString());
             prevKey = key;
         }
         if (!prevKey.isEmpty()) {
@@ -146,6 +159,7 @@ public class Markov {
         String w = startWords.get(i).toLowerCase();
         StringBuilder sb = new StringBuilder(startWords.get(i));
         Info info = data.get(w);
+        logger.debug(info.toString());
         boolean finished = false;
         int size = 1;
         while (info.getFollow().size() > 0 && !finished && size < 30) {
