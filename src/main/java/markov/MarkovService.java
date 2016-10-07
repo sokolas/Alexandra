@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.util.StringUtils;
 import reactor.util.function.Tuple2;
 import reactor.util.function.Tuples;
 import sx.blah.discord.api.events.Event;
@@ -13,13 +14,14 @@ import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.handle.obj.IMessage;
 import sx.blah.discord.handle.obj.IUser;
 import sx.blah.discord.handle.obj.IVoiceChannel;
-import sx.blah.discord.util.RateLimitException;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
-public class MarkovSubscriber implements Consumer<Event> {
-    private static final Logger logger = LoggerFactory.getLogger(MarkovSubscriber.class);
+public class MarkovService implements Consumer<Event> {
+    private static final Logger logger = LoggerFactory.getLogger(MarkovService.class);
 
     private Markov everyone;
 
@@ -62,7 +64,7 @@ public class MarkovSubscriber implements Consumer<Event> {
             started = true;
             me = event.getClient().getOurUser();
             everyone = new Markov();
-            markovs = new HashMap<>();
+            markovs = new ConcurrentHashMap<>();
             event.getClient().getChannels(false).forEach(channel -> {
                 if (!(channel instanceof IVoiceChannel)
                         && (allowedChannels.contains(channel.getName())) || allowedChannels.contains(channel.getID())) {
@@ -97,6 +99,22 @@ public class MarkovSubscriber implements Consumer<Event> {
     private boolean isCommand(IMessage message) {
         return message.getContent().startsWith("!")
                 || message.getContent().startsWith("--");
+    }
+
+    public String generateForName(String target) {
+        return markovs.keySet().stream()
+                .filter(user -> user.getName().equals(target))
+                .findFirst()
+                .map(user -> markovs.get(user).generate())
+                .orElse("Not found");
+    }
+
+    public String generateForAll() {
+        return everyone.generate();
+    }
+
+    public List<String> getUsers() {
+        return new ArrayList<>(markovs.keySet().stream().map(IUser::getName).collect(Collectors.toList()));
     }
 
     private void onMessage(IMessage message) {
@@ -185,7 +203,7 @@ public class MarkovSubscriber implements Consumer<Event> {
         processed = 0;
         postsCount = 0;
         everyone = new Markov();
-        markovs = new HashMap<>();
+        markovs = new ConcurrentHashMap<>();
         int i = 0;
         while (processed < minLogs) {
             try {

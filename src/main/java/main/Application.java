@@ -1,6 +1,6 @@
 package main;
 
-import markov.MarkovSubscriber;
+import markov.MarkovService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +24,6 @@ import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.events.Event;
 import sx.blah.discord.api.events.IListener;
 import sx.blah.discord.handle.impl.events.MessageReceivedEvent;
-import sx.blah.discord.handle.impl.obj.Channel;
 import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.util.DiscordException;
 import sx.blah.discord.util.MissingPermissionsException;
@@ -33,7 +32,7 @@ import sx.blah.discord.util.RateLimitException;
 import java.util.function.Consumer;
 
 @Configuration
-@ComponentScan(basePackages={"main", "rpgbot", "persistence"})
+@ComponentScan(basePackages={"main", "rpgbot", "persistence", "web"})
 @EnableAutoConfiguration
 @EnableJpaRepositories("persistence")
 @EntityScan("persistence")
@@ -63,7 +62,7 @@ public class Application implements CommandLineRunner {
     private Consumer<Tuple2<IChannel, String>> sender;
 
     @Autowired
-    private MarkovSubscriber markovSubscriber;
+    private MarkovService markovService;
 
 	@Value("${app.token}")
 	private String token;
@@ -93,8 +92,8 @@ public class Application implements CommandLineRunner {
     }
 
     @Bean
-    public MarkovSubscriber markovSubscriber() {
-        return new MarkovSubscriber();
+    public MarkovService markovSubscriber() {
+        return new MarkovService();
     }
 
     // ====================================================================
@@ -136,6 +135,6 @@ public class Application implements CommandLineRunner {
                 .filter(event -> event instanceof MessageReceivedEvent)
                 .map(event -> (MessageReceivedEvent) event)
                 .subscribe(receiver);
-        discordEmitterProcessor.subscribe(markovSubscriber);
+        discordEmitterProcessor.subscribe(markovService);
     }
 }

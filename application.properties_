@@ -5,3 +5,5 @@ allowedChannels=general
 minLogs=700
 maxLogs=1500
 resetCount=500
+server.port=18080
+server.contextPath=/cassandra
