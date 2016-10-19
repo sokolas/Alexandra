@@ -19,6 +19,7 @@ import reactor.core.publisher.*;
 import reactor.util.function.Tuple2;
 import rpgbot.MessageReceiver;
 import rpgbot.MsgLogger;
+import slotmachine.SlotReceiver;
 import sx.blah.discord.api.ClientBuilder;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.events.Event;
@@ -64,6 +65,9 @@ public class Application implements CommandLineRunner {
     @Autowired
     private MarkovService markovService;
 
+    @Autowired
+    private SlotReceiver slotMachine;
+
 	@Value("${app.token}")
 	private String token;
 
@@ -94,6 +98,11 @@ public class Application implements CommandLineRunner {
     @Bean
     public MarkovService markovSubscriber() {
         return new MarkovService();
+    }
+
+    @Bean
+    public SlotReceiver slotMachine() {
+        return new SlotReceiver();
     }
 
     // ====================================================================
@@ -136,5 +145,9 @@ public class Application implements CommandLineRunner {
                 .map(event -> (MessageReceivedEvent) event)
                 .subscribe(receiver);
         discordEmitterProcessor.subscribe(markovService);
+        discordEmitterProcessor
+                .filter(event -> event instanceof MessageReceivedEvent)
+                .map(event -> (MessageReceivedEvent) event)
+                .subscribe(slotMachine);
     }
 }
