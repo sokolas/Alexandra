@@ -33,7 +33,7 @@ import sx.blah.discord.util.RateLimitException;
 import java.util.function.Consumer;
 
 @Configuration
-@ComponentScan(basePackages={"main", "rpgbot", "persistence", "web"})
+@ComponentScan(basePackages={"main", "rpgbot", "persistence", "web", "slotmachine"})
 @EnableAutoConfiguration
 @EnableJpaRepositories("persistence")
 @EntityScan("persistence")
