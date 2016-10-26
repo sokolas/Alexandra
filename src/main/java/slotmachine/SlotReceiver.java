@@ -72,28 +72,32 @@ public class SlotReceiver implements Consumer<MessageReceivedEvent> {
         }
         if (text.startsWith("--roll")) {
             StringBuilder sb = new StringBuilder(author.mention()).append(": ");
-            HashSet<String> checkSet = new HashSet<>();
-            for (int i = 0; i < SLOTS; i++) {
-                int k = random.nextInt(slots.size());
+            if (slots.size() == 0) {
+                sb.append("add slots with --slots :kappa:\ncheck slots with --list");
+            } else {
+                HashSet<String> checkSet = new HashSet<>();
+                for (int i = 0; i < SLOTS; i++) {
+                    int k = random.nextInt(slots.size());
 //                System.out.println("" + k + "/" + slots.size() + ": " + slots.get(k));
-                String s = slots.get(k);
-                checkSet.add(s);
-                sb.append(s).append(" ");
-            }
-            sender.accept(Tuples.of(channel, sb.toString()));
-            if (checkSet.size() == 1) {
-                sender.accept(Tuples.of(channel, author.mention() + " wins!"));
-                Winner winner = winnerRepository.findOneByMention(author.mention());
-                if (winner == null) {
-                    winner = new Winner();
-                    winner.setMention(author.mention());
-                    winner.setRolled(sb.toString());
-                    winner.setScore(1L);
-                    winnerRepository.save(winner);
-                } else {
-                    winner.setScore(winner.getScore() + 1);
-                    winner.setRolled(sb.toString());
-                    winnerRepository.save(winner);
+                    String s = slots.get(k);
+                    checkSet.add(s);
+                    sb.append(s).append(" ");
+                }
+                sender.accept(Tuples.of(channel, sb.toString()));
+                if (checkSet.size() == 1) {
+                    sender.accept(Tuples.of(channel, author.mention() + " wins!"));
+                    Winner winner = winnerRepository.findOneByMention(author.mention());
+                    if (winner == null) {
+                        winner = new Winner();
+                        winner.setMention(author.mention());
+                        winner.setRolled(sb.toString());
+                        winner.setScore(1L);
+                        winnerRepository.save(winner);
+                    } else {
+                        winner.setScore(winner.getScore() + 1);
+                        winner.setRolled(sb.toString());
+                        winnerRepository.save(winner);
+                    }
                 }
             }
         } else if (text.startsWith("--list")) {
